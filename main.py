@@ -115,7 +115,66 @@ def get_ciba():
     return note_ch, note_en
  
  
-
+def send_message(to_user, access_token, region_name, weather, temp, wind_dir, note_ch, note_en):
+    url = "https://api.weixin.qq.com/cgi-bin/message/template/send?access_token={}".format(access_token)
+    week_list = ["星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"]
+    year = localtime().tm_year
+    month = localtime().tm_mon
+    day = localtime().tm_mday
+    today = datetime.date(datetime(year=year, month=month, day=day))
+    week = week_list[today.isoweekday() % 7]
+    # 获取在一起的日子的日期格式
+    love_year = int(config["love_date"].split("-")[0])
+    love_month = int(config["love_date"].split("-")[1])
+    love_day = int(config["love_date"].split("-")[2])
+    love_date = date(love_year, love_month, love_day)
+    # 获取在一起的日期差
+    love_days = str(today.__sub__(love_date)).split(" ")[0]
+    # 获取所有生日数据
+    birthdays = {}
+    for k, v in config.items():
+        if k[0:5] == "birth":
+            birthdays[k] = v
+    data = {
+        "touser": to_user,
+        "template_id": config["template_id"],
+        "url": "http://weixin.qq.com/download",
+        "topcolor": "#FF0000",
+        "data": {
+            "date": {
+                "value": "{} {}".format(today, week),
+                "color": get_color()
+            },
+            "region": {
+                "value": region_name,
+                "color": get_color()
+            },
+            "weather": {
+                "value": weather,
+                "color": get_color()
+            },
+            "temp": {
+                "value": temp,
+                "color": get_color()
+            },
+            "wind_dir": {
+                "value": wind_dir,
+                "color": get_color()
+            },
+            "love_day": {
+                "value": love_days,
+                "color": get_color()
+            },
+            "note_en": {
+                "value": note_en,
+                "color": get_color()
+            },
+            "note_ch": {
+                "value": note_ch,
+                "color": get_color()
+            }
+        }
+    }
     for key, value in birthdays.items():
         # 获取距离下次生日的时间
         birth_day = get_birthday(value["birthday"], year, today)
